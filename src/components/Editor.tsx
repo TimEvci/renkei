@@ -3,14 +3,17 @@ import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import tsWorker from "monaco-editor/esm/vs/language/typescript/ts.worker?worker";
 import cssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
 import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
-import { Suspense, onCleanup, onMount } from "solid-js";
-import * as monaco from "monaco-editor";
+import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
+import { Suspense, createEffect, onCleanup, onMount } from "solid-js";
+import { editor } from "monaco-editor";
 
 window.MonacoEnvironment = {
   getWorker(_moduleId: unknown, label: string) {
     switch (label) {
       case "css":
         return new cssWorker();
+      case "html":
+        return new htmlWorker();
       case "json":
         return new jsonWorker();
       case "typescript":
@@ -26,15 +29,16 @@ interface MonacoEditorProps {
   value?: string;
   language?: string;
   theme?: string;
-  options?: monaco.editor.IStandaloneEditorConstructionOptions;
-  onEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  options?: editor.IStandaloneEditorConstructionOptions;
+  onEditorMount?: (editor: editor.IStandaloneCodeEditor) => void;
 }
 
 const MonacoEditor = (props: MonacoEditorProps) => {
   let container: HTMLDivElement | undefined;
+  let monacoEditor: editor.IStandaloneCodeEditor | undefined;
 
   onMount(() => {
-    const editor = monaco.editor.create(container!, {
+    monacoEditor = editor.create(container!, {
       value: props.value || "",
       language: props.language || "javascript",
       theme: props.theme || "vs-dark",
@@ -42,13 +46,22 @@ const MonacoEditor = (props: MonacoEditorProps) => {
     });
 
     if (props.onEditorMount) {
-      props.onEditorMount(editor);
+      props.onEditorMount(monacoEditor);
     }
 
     onCleanup(() => {
-      editor.dispose();
+      monacoEditor?.dispose();
     });
   });
+
+  createEffect(() => {
+    if (monacoEditor) {
+      editor.setModelLanguage(
+        monacoEditor.getModel()!,
+        props.language || "javascript"
+      );
+    }
+  }, props.language);
 
   return (
     <Suspense
