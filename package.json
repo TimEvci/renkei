@@ -12,10 +12,13 @@
     "@solidjs/router": "^0.13.3",
     "@solidjs/start": "^1.0.0",
     "autoprefixer": "^10.4.19",
+    "monaco-editor": "^0.48.0",
+    "onigasm": "^2.2.5",
     "postcss": "^8.4.38",
     "solid-js": "^1.8.17",
     "tailwindcss": "^3.4.3",
-    "vinxi": "^0.3.11"
+    "vinxi": "^0.3.11",
+    "vite-plugin-monaco-editor": "^1.1.0"
   },
   "engines": {
     "node": ">=18"
